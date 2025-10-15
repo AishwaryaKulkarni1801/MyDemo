@@ -1,3 +1,17 @@
+# GitHub Actions CI/CD Workflow for Angular Deployment
+
+## Issue Resolution: Environment Configuration
+
+**Problem:** The `environment` configuration was incorrectly placed at the root level of the workflow YAML, causing the error:
+```
+(Line: 13, Col: 1): Unexpected value 'environment'
+```
+
+**Solution:** The `environment` configuration must be placed inside the job definition, not at the workflow root level.
+
+## Corrected Workflow Structure
+
+```yaml
 name: Deploy to GitHub Pages
 
 on:
@@ -49,3 +63,18 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+```
+
+## Key Corrections Made:
+1. Moved `environment` block inside the `build-deploy` job
+2. Maintained proper YAML indentation
+3. Kept all other configurations intact
+
+## Workflow Features:
+- ✅ Triggers on push to main branch and manual dispatch
+- ✅ Proper permissions for GitHub Pages deployment
+- ✅ Environment tracking with dynamic URL output
+- ✅ Node.js 18 with npm caching
+- ✅ Automatic repository name detection
+- ✅ SPA routing fix with 404.html fallback
+- ✅ Concurrency control for deployments
