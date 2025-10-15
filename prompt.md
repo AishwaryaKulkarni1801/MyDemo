@@ -1,13 +1,21 @@
 # GitHub Actions CI/CD Workflow for Angular Deployment
 
-## Issue Resolution: Environment Configuration
+## Issue Resolution: Environment Configuration & File Copy Error
 
-**Problem:** The `environment` configuration was incorrectly placed at the root level of the workflow YAML, causing the error:
+**Problem 1:** The `environment` configuration was incorrectly placed at the root level of the workflow YAML, causing the error:
 ```
 (Line: 13, Col: 1): Unexpected value 'environment'
 ```
 
-**Solution:** The `environment` configuration must be placed inside the job definition, not at the workflow root level.
+**Solution 1:** The `environment` configuration must be placed inside the job definition, not at the workflow root level.
+
+**Problem 2:** The file copy command failed with:
+```
+cp: cannot create regular file 'dist/*/404.html': No such file or directory
+Error: Process completed with exit code 1.
+```
+
+**Solution 2:** The wildcard pattern `dist/*/` wasn't being expanded properly by the shell. Fixed by using `find` command to locate and copy the index.html file to 404.html in the correct directory.
 
 ## Corrected Workflow Structure
 
@@ -50,7 +58,10 @@ jobs:
       - name: Build Angular app
         run: |
           npm run build -- --base-href "/${{ github.event.repository.name }}/"
-          cp dist/*/index.html dist/*/404.html
+          
+      - name: Fix routing for SPA
+        run: |
+          find dist -name "index.html" -execdir cp {} 404.html \;
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
@@ -68,7 +79,9 @@ jobs:
 ## Key Corrections Made:
 1. Moved `environment` block inside the `build-deploy` job
 2. Maintained proper YAML indentation
-3. Kept all other configurations intact
+3. Separated build and file copy into different steps
+4. Used `find` command with `-execdir` to properly copy index.html to 404.html
+5. Kept all other configurations intact
 
 ## Workflow Features:
 - ✅ Triggers on push to main branch and manual dispatch

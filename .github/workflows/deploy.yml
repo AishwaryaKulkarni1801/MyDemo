@@ -36,7 +36,10 @@ jobs:
       - name: Build Angular app
         run: |
           npm run build -- --base-href "/${{ github.event.repository.name }}/"
-          cp dist/*/index.html dist/*/404.html
+          
+      - name: Fix routing for SPA
+        run: |
+          find dist -name "index.html" -execdir cp {} 404.html \;
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
