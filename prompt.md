@@ -1,6 +1,6 @@
 # GitHub Actions CI/CD Workflow for Angular Deployment
 
-## Issue Resolution: Environment Configuration & File Copy Error
+## Issue Resolution: Multiple Deployment Fixes
 
 **Problem 1:** The `environment` configuration was incorrectly placed at the root level of the workflow YAML, causing the error:
 ```
@@ -16,6 +16,15 @@ Error: Process completed with exit code 1.
 ```
 
 **Solution 2:** The wildcard pattern `dist/*/` wasn't being expanded properly by the shell. Fixed by using `find` command to locate and copy the index.html file to 404.html in the correct directory.
+
+**Problem 3:** The artifact upload failed with:
+```
+tar: dist/*: Cannot open: No such file or directory
+tar: Error is not recoverable: exiting now
+Error: Process completed with exit code 2.
+```
+
+**Solution 3:** Changed the upload path from `dist/*` to `dist` to upload the entire dist directory instead of using wildcards.
 
 ## Corrected Workflow Structure
 
@@ -69,7 +78,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: dist/*
+          path: dist
 
       - name: Deploy to GitHub Pages
         id: deployment
@@ -81,7 +90,8 @@ jobs:
 2. Maintained proper YAML indentation
 3. Separated build and file copy into different steps
 4. Used `find` command with `-execdir` to properly copy index.html to 404.html
-5. Kept all other configurations intact
+5. Changed artifact upload path from `dist/*` to `dist` to avoid wildcard issues
+6. Kept all other configurations intact
 
 ## Workflow Features:
 - ✅ Triggers on push to main branch and manual dispatch
